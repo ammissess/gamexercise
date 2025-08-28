@@ -7,7 +7,11 @@ import android.util.Log;
 
 public class MainScreen implements Screen {
     private float squareX = 0f;
+    private float squareY = 0f;
     private float speed = 200f;
+    private float velocityY = 0f;
+    private static final float GRAVITY = 1000f;
+    private static final float JUMP_VELOCITY = -650f;
     private GameView gameView;
     private Paint paint;
     private Paint textPaint;
@@ -27,27 +31,43 @@ public class MainScreen implements Screen {
         if (squareX > gameView.getWidth()) {
             squareX = 0f;
         }
-        Log.d("Game", "Update: squareX=" + squareX + ", speed=" + speed);
+
+        // Cập nhật nhảy với giới hạn trên/dưới
+        velocityY += GRAVITY * deltaTime;
+        squareY += velocityY * deltaTime;
+
+        // Giới hạn di chuyển trong phạm vi giữa màn hình (ví dụ: ±200 từ vị trí giữa)
+        float centerY = gameView.getHeight() / 2;
+        if (squareY < centerY - 200) {
+            squareY = centerY - 200;
+            velocityY = 0;
+        } else if (squareY > centerY + 200) {
+            squareY = centerY + 200;
+            velocityY = 0;
+        }
+        Log.d("Game", "Update: squareX=" + squareX + ", squareY=" + squareY + ", velocityY=" + velocityY);
     }
 
     @Override
     public void render(Canvas canvas) {
-        canvas.drawRect(squareX, 100, squareX + 100, 200, paint);
-        canvas.drawText("Speed: " + String.format("%.0f", speed), 20, 50, textPaint);
+        if (canvas != null) {
+            canvas.drawRect(squareX, squareY, squareX + 100, squareY + 100, paint); // Vẽ khối 100x100
+            canvas.drawText("Speed: " + String.format("%.0f", speed), 20, 50, textPaint);
+        }
     }
 
-    public float getSquareX() {
-        return squareX;
+    public void jump() {
+        if (velocityY == 0) {
+            velocityY = JUMP_VELOCITY;
+            Log.d("Game", "Jump initiated, velocityY: " + velocityY);
+        }
     }
 
-    public void setSquareX(float x) {
-        this.squareX = x;
-    }
-
-    public float getSpeed() {
-        return speed;
-    }
-
+    public float getSquareX() { return squareX; }
+    public void setSquareX(float x) { this.squareX = x; }
+    public float getSquareY() { return squareY; }
+    public void setSquareY(float y) { this.squareY = y; }
+    public float getSpeed() { return speed; }
     public void setSpeed(float speed) {
         this.speed = Math.max(0, Math.min(speed, 1000f));
         Log.d("Game", "Speed set to: " + this.speed);

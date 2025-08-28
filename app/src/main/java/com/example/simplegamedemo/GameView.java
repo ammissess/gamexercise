@@ -50,6 +50,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     public void doDraw(Canvas canvas) {
         if (canvas != null) {
             canvas.drawColor(0xFFFFFFFF); // Nền trắng
+            if (mainScreen != null) {
+                mainScreen.render(canvas); // Vẽ khối từ MainScreen
+            }
         }
     }
 
